@@ -16,6 +16,9 @@ from bayesNet import Factor
 import functools
 from util import raiseNotDefined
 
+# added imports
+from math import prod
+
 def joinFactorsByVariableWithCallTracking(callTrackingList=None):
 
 
@@ -99,10 +102,36 @@ def joinFactors(factors: List[Factor]):
                     "\nappear in more than one input factor.\n" + 
                     "Input factors: \n" +
                     "\n".join(map(str, factors)))
-
-
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    variableDomainsDict = {}
+    conditionedVariables = set()
+    unconditionedVariables = set()
+
+    for factor in factors:
+        variableDomainsDict = factor.variableDomainsDict()
+        break
+
+    # Separate conditioned and unconditioned variables
+    for factor in factors:
+        conditionedVariables.update(factor.conditionedVariables())
+        unconditionedVariables.update(factor.unconditionedVariables())
+
+    # print("conditionedVariables", conditionedVariables)
+    # print("unconditionedVariables", unconditionedVariables)
+
+    # Remove conditioned variables from unconditionedVariables
+    conditionedVariables.difference_update(unconditionedVariables)
+
+    # Create new Factor
+    newFactor = Factor(unconditionedVariables, conditionedVariables, variableDomainsDict)
+    assignmentDict = newFactor.getAllPossibleAssignmentDicts()
+
+    # print("assignments: ", assignments)
+    for assignment in assignmentDict:
+        probability = prod([factor.getProbability(assignment) for factor in factors])
+        newFactor.setProbability(assignment, probability)
+
+    return newFactor
     "*** END YOUR CODE HERE ***"
 
 ########### ########### ###########
@@ -153,7 +182,28 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        variableDomainsDict = factor.variableDomainsDict()
+        conditionedVariables = factor.conditionedVariables()
+        unconditionedVariables = factor.unconditionedVariables()
+        unconditionedVariables.remove(eliminationVariable)
+
+        # Create new Factor
+        eliminationFactor = Factor(unconditionedVariables, conditionedVariables, variableDomainsDict)
+        eliminationDict = variableDomainsDict[eliminationVariable]
+        assignmentDict = eliminationFactor.getAllPossibleAssignmentDicts()
+
+        # print("eliminationDict: ", eliminationDict)
+        # print("eliminationVariable: ", eliminationVariable)
+        for assignment in assignmentDict:
+            # print("assignment: ", assignment)
+            probability = 0
+            for value in eliminationDict:
+                assignment[eliminationVariable] = value
+                probability += factor.getProbability(assignment) 
+            eliminationFactor.setProbability(assignment, probability)
+
+        return eliminationFactor
+
         "*** END YOUR CODE HERE ***"
 
     return eliminate
