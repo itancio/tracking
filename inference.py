@@ -195,17 +195,24 @@ def inferenceByVariableEliminationWithCallTracking(callTrackingList=None):
             eliminationOrder = sorted(list(eliminationVariables))
 
         "*** YOUR CODE HERE ***"
-        allCPTsWithEvidence = bayesNet.getAllCPTsWithEvidence(evidenceDict)
+        currentFactorsList = bayesNet.getAllCPTsWithEvidence(evidenceDict)
 
-        for eliminationVariable in eliminationOrder:
-            allCPTsWithEvidence, hiddenVariable = joinFactorsByVariable(allCPTsWithEvidence, eliminationVariable)
+        # Loop over hidden variables in the order of elimination
+        for hiddenVariable in eliminationOrder:
+            # Perform joining Factors for each variable
+            currentFactorsList, eliminationVariable = joinFactorsByVariable(currentFactorsList, hiddenVariable)
 
-            if len(hiddenVariable.unconditionedVariables()) is not 1:
-                allCPTsWithEvidence.append(eliminate(hiddenVariable, eliminationVariable))
-        return normalize(joinFactors(allCPTsWithEvidence))
-            
+            # If a factor that you are about to eliminate a variable from has only one unconditioned variable,
+            # you should not eliminate it and instead just discard the factor
+            if len(eliminationVariable.unconditionedVariables()) is 1:
+                continue
+
+            # Eliminate the variable from the current factors list
+            currentFactorsList.append(eliminate(eliminationVariable, hiddenVariable))
+        
+        # Normalize the probabilities of the factor so the sum would add up to 1
+        return normalize(joinFactors(currentFactorsList))
         "*** END YOUR CODE HERE ***"
-
 
     return inferenceByVariableElimination
 
@@ -344,7 +351,11 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        total = self.total()
+        if not total:
+            return
+        for key in self.keys():
+            self[key] /= total
         "*** END YOUR CODE HERE ***"
 
     def sample(self):
@@ -369,7 +380,14 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        randomNumber = random.random()
+        self.normalize() 
+        result = 0
+        for key, value in self.items():
+            result += value
+            if randomNumber <= result:
+                return key
+        return key
         "*** END YOUR CODE HERE ***"
 
 
@@ -444,7 +462,13 @@ class InferenceModule:
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        # Handling special case for capturing a ghost
+        if jailPosition == ghostPosition:
+            return noisyDistance == None
+        if noisyDistance == None:
+            return 0
+        trueDistance = manhattanDistance(pacmanPosition, ghostPosition)
+        return busters.getObservationProbability(noisyDistance, trueDistance)
         "*** END YOUR CODE HERE ***"
 
     def setGhostPosition(self, gameState, ghostPosition, index):
