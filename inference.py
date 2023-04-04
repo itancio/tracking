@@ -204,7 +204,7 @@ def inferenceByVariableEliminationWithCallTracking(callTrackingList=None):
 
             # If a factor that you are about to eliminate a variable from has only one unconditioned variable,
             # you should not eliminate it and instead just discard the factor
-            if len(eliminationVariable.unconditionedVariables()) is 1:
+            if len(eliminationVariable.unconditionedVariables()) == 1:
                 continue
 
             # Eliminate the variable from the current factors list
@@ -647,7 +647,8 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        legal = self.legalPositions
+        self.particles.extend([legal[i % len(legal)] for i in range(self.numParticles)])
         "*** END YOUR CODE HERE ***"
 
     def getBeliefDistribution(self):
@@ -659,7 +660,12 @@ class ParticleFilter(InferenceModule):
         This function should return a normalized distribution.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        beliefState = DiscreteDistribution()
+        for particle in self.particles:
+            weight = 1 / self.numParticles
+            beliefState[particle] += weight
+        beliefState.normalize()
+        return beliefState
         "*** END YOUR CODE HERE ***"
     
     ########### ########### ###########
