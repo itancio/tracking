@@ -149,5 +149,17 @@ class GreedyBustersAgent(BustersAgent):
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        
+        positionWithMaxDistributions = []
+        for distribution in livingGhostPositionDistributions:
+            positionWithMaxDistributions.append(distribution.argMax())
+
+        mazeDistanceDict = util.Counter()
+        for action in legal:
+            for position in positionWithMaxDistributions:
+                successorPosition = Actions.getSuccessor(pacmanPosition, action)
+                mazeDistance = self.distancer.getDistance(successorPosition, position)
+                mazeDistanceDict[action] = -mazeDistance 
+
+        return mazeDistanceDict.argMax()
         "*** END YOUR CODE HERE ***"
