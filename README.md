@@ -5,6 +5,8 @@ In the "Ghostbusters" variant of Pacman, players navigate a world where Pacman, 
 
 The primary objective is to refine ghost position estimations, aiding Pacman in his vengeful quest. The game interface provides players with fluctuating distance readings, indicating the proximity of the elusive ghosts.
 
+<img src="assets/pacman.png" width="80%"/>
+
 ## Buster Agents
 The GreedyBustersAgent is an AI-driven agent that aggressively approaches the closest ghost. The file emphasizes the belief distributions in estimating ghost positions and utilizes distance calculations to guide Pacman's actions.
 
